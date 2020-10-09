@@ -24,6 +24,9 @@ Those questions have already been tackled by `ocamlfind` developed by Gerd
 Stolpmann since before 2004. So for each point the choices made by `ocamlfind`
 are recalled.
 
+The propositions in each section are distinct and often incompatible. They show
+point where the consensus have not been reached or which give interesting alternative.
+
 Definition of a library
 ***********************
 
@@ -105,7 +108,7 @@ lookup path.
 
 | FOO=only_dir
 
-.. admonition:: Proposition1
+.. admonition:: Proposition
 
   Reusing the variable `OCAMLPATH` seems the most natural things to do, in that
   case keeping the semantic of ocamlfind is mandatory: final separator ignored,
@@ -118,9 +121,11 @@ We could also add the variable to `ocamlc -config` but it complicates the
 modification after installation. A new file `ocaml.config` can be chosen instead
 of `Makefile.config` .
 
-.. admonition:: Proposition2
+.. admonition:: Proposition
 
                 add updated proposition from RFC
+
+..todo:: add updated proposition from RFC
 
 Library layout
 --------------
@@ -139,7 +144,7 @@ Examples:
 .. [python_module]  https://docs.python.org/3.5/tutorial/modules.html#packages
 
   * pkg-config only lookup `.pc` files in the lookup directories which are
-    configuration file for the library:
+    configuration file for the library which contains:
 
      - name
      - directories
@@ -163,9 +168,142 @@ Examples:
 
 There is a consensus for simplifying the layout of the library:
 
-  * only 
+  * one directory is a library
+  * There is only one archive for each compilation mode named `lib.cma`,
+    `lib.cmxa`, `lib.cmxs` (it is always `lib` even for `foo` library).
+  * All the needed `cmi`, `cmx`, `cmt`, `.a`, `cmo` are in this directory
+  * The sub-directories are sub-libraries (`foo/bar` corresponds to `foo.bar`).
+
+..todo: add restrictions of names from the RFC
+
+.. admonition:: Proposition
+
+                The information about library dependencies is stored in the
+                archives. The information must be the same for the three
+                archives. It is stored by the compiler and specified to it using
+                a new option `-require` during archive creation.
+
+                External tools would obtain this information from `ocamlobjinfo`.
 
 
+This proposition has the advantage of not requiring new files and of putting
+together all the information that the static or dynamic linking phase needs in
+one place since the archive are already read. But it has some disadvantage:
+- to duplicate the information, which can create subtitle bugs
+- be a binary format, so `rgrep` can't be used for debugging
+- it is not extensible, in this proposition `ppx` support would need an
+  additional file.
+
+.. admonition:: Proposition
+
+                A mandatory configuration file `lib.META` which use the same format than
+                `ocamlc -config` (`key:value`) with possibly the following
+                optional keys:
+
+                - `requires`: string, with a space separated list of libraries
+                  (default empty)
+                - `version`: string, a version with debian semantic for the
+                  comparison [debian_version]_
+                - `synopsis`: string, a oneliner to use when listing libraries
+                - `private` : boolean, indicates if the library should be listed
+
+                As for python `__init__.py` a directory that doesn't contains
+                `lib.META` is not considered as a library or sub-library.
+
+                Custom key can be used but they must use a dot inside
+                `qualifier.key`. Other keys without dot are restricted to future
+                extensions.
+
+.. [debian_version] https://www.debian.org/doc/debian-policy/ch-controlfields.html#version
+
+Library installed by the OCaml compiler
+---------------------------------------
+
+Currently ocamlfind (and dune) needs to create the configuration for the
+libraries installed by the compiler (`unix`, `threads`, `str`, ...) for each of
+its version.
+ - for ocamlfind: https://github.com/ocaml/ocamlfind/blob/9e40620/configure#L505
+ - for dune:
+   https://github.com/ocaml/dune/blob/58cb185/src/dune_rules/findlib/meta.ml#L144
+
+This adds an additional reason for which it is not possible to test the trunk
+version of OCaml, for example when moving out a libraries (as append for `num`).
+
+However the installation directory has been a contentious subject in the past.
+
+.. admonition:: Proposition
+
+                To make the OCaml compiler libraries follow the layout for
+                libraries is pushed at a later date.
+
+However it is quite unsatisfying that the OCaml library can't be used
+out-of-the-box so a backward compatible way can be tried.
+
+.. admonition:: Proposition
+
+                The installation directory is kept as it is, but a directory
+                with the correct layout is added and is filled with hardlink to
+                the other files. This directory is part of the built-in lookup
+                path.
+
+
+Dynamic Linking
+---------------
+
+Dynamic linking as been well supported by OCamlfind since 2015:
+  - specify the `plugin` variable to specify the shared archive in `META` file
+  - when `ocamlfind` link an executable which depends on `findlib.dynload`, it registers the statically linked
+    library by linking newly created module.
+  - The library `findlib.dynload` allows at runtime to load a library
+    and its dependencies (hide the dynlink details)
+
+Since 2018, Dune also does this trick at link time if `findlib.dynload` is a
+dependency.
+
+Currently the development of another `findlib.dynload` is not possible in a
+compatible way because the set of package already loaded is not shared. Moreover
+the linking trick could perhaps be simplified.
+
+.. admonition:: Proposition
+
+                Define a little project which would only keep the set of name of
+                linked libraries. It is empty at the start, an external module
+                should add the statically linked modules.
+
+               | val all_libraries : unit -> string list
+               | (** [all_libraries ()] is the set of loaded libraries statically
+               | or dynamically. *)
+               |
+               | val has_library : string -> bool
+               | (** [has_library l] is [List.mem l (all_libraries ())]. *)
+               |
+               | val add_library: string -> unit
+               | (** [add_library l] consider this library as loaded *)
+
+
+It is even possible to define this library without an implementation, the tool
+that run the ocaml linker (e.g ocamlfind, dune, ocamlbuild, brzo) could create a
+specific implementation which would directly initialize this database with the
+statically loaded library of the executable.
+
+However the `dynlink` module is a nice place to add that.
+
+.. admonition:: Proposition
+
+                Adds the function of the previous proposition to the `dynlink`
+                module.
+
+The linker can even simplify the initialization of the data-structure.
+
+.. admonition:: Proposition
+
+                ocamlc and ocamlopt gain an optional `--assume-require name` in
+                link mode, which adds this `name` to the set of loaded
+                libraries. It doesn't change in any way what is linked, only
+                change the database.
+
+The name `--assume-require` follows the one with similar use of the RFC for
+simplicity. But another name could be more appropriate.
 
 
 Indices and tables
@@ -175,4 +313,6 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-..  LocalWords:  François Bobot OCaml Bünzli Gerd Stolpmann
+.. todolist::
+
+..  LocalWords:  François Bobot OCaml Bünzli Gerd Stolpmann reimplementation
