@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCaml libraries discussion summary &#8212; ocaml libraries summary  documentation</title>
+    <link rel="stylesheet" href="../../../../../../../../../../../../../../../../../../../../../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../../../../../../../../../../../../../../../../../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../../../../../../../../../../../../../../../../../../../../../" src="../../../../../../../../../../../../../../../../../../../../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../../../../../../../../../../../../../../../../../../../../_static/jquery.js"></script>
+    <script src="../../../../../../../../../../../../../../../../../../../../../../../../_static/underscore.js"></script>
+    <script src="../../../../../../../../../../../../../../../../../../../../../../../../_static/doctools.js"></script>
+    <script src="../../../../../../../../../../../../../../../../../../../../../../../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../../../../../../../../../../../../../../../../../../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../../../../../../../../../../../../../../../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../../../../../../../../../../../../../../../../../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="ocaml-libraries-discussion-summary">
+<h1>OCaml libraries discussion summary<a class="headerlink" href="#ocaml-libraries-discussion-summary" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<p>This document summaries my, François Bobot, understanding of the discussion
+around adding library management to the OCaml compiler and the simplification of
+the OCaml ecosystem on libraries. Those discussions took place during the OCaml
+Library Linking proposal project initiated by Daniel Bünzli and funded by the
+OCaml foundation.</p>
+<p>Those questions have already been tackled by <cite>ocamlfind</cite> developed by Gerd
+Stolpmann since before 2004. So for each point the choices made by <cite>ocamlfind</cite>
+are recalled.</p>
+<p>The propositions in each section are distinct and often incompatible. They show
+point where the consensus have not been reached or which give interesting alternative.</p>
+<div class="section" id="directory-location">
+<h2>Directory location<a class="headerlink" href="#directory-location" title="Permalink to this headline">¶</a></h2>
+<p>Where the declarations of the libraries can be found is unavoidable for
+library management. Some examples:</p>
+<blockquote>
+<div><ul>
+<li><p>pkg-config:</p>
+<p>By default, pkg-config looks in the directory <cite>prefix/lib/pkgconfig</cite> for these
+files; it will also look in the colon-separated (on Windows,
+semicolon-separated) list of directories specified by the <cite>PKG_CONFIG_PATH</cite>
+environment variable.</p>
+<p>– pkg-config man page</p>
+</li>
+<li><p>tex:</p>
+<p>TEXINPUTS Search path for input and openin files. This should probably
+start with ‘’.’’, so that user files are found before system files. An empty
+path component will be replaced with the paths defined in the texmf.cnf
+file. For example, set TEXINPUTS to “.:/home/usr/tex:” to prepend the
+current direcory and ‘’/home/user/tex’’ to the standard search path.</p>
+<p>– tex man page</p>
+</li>
+<li><p>ocamlfind:</p>
+<ul class="simple">
+<li><p>The file findlib.conf contains the default <cite>path</cite>:</p></li>
+</ul>
+<p>The  directory  containing  findlib.conf is determined at build time (by running the configure script),
+the fallback default is /usr/local/etc. You can set a different location by  changing  the  environment
+variable OCAMLFIND_CONF which must contain the absolute path of findlib.conf.</p>
+<p><cite>path</cite> The  search  path for META files/package directories. The variable  enumerates directories which
+are separated by colons (Windows:  semicolons), and these directories are tried in turn to  find
+a  certain    package.</p>
+<p>– findlib.conf man page</p>
+<ul class="simple">
+<li><p><cite>OCAMLPATH</cite> allows to modifies it:</p></li>
+</ul>
+<p>OCAMLPATH This variable may contain an additional search path for package  directories. It is  treated  as
+if the directories were prepended to  the configuration variable path.</p>
+<p>– findlib.conf man page</p>
+</li>
+</ul>
+</div></blockquote>
+<p>The different tools have similarities and differences:</p>
+<p>A builtin list of paths:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>without indirection: directly in the binary</p></li>
+<li><dl class="simple">
+<dt>with an indirection: the binaries contain the path to a configuration</dt><dd><p>file which contains the list of paths to lookup.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The builtin lookup list of path must accept more than one elements because
+contrary to an <cite>opam</cite> installation, a distribution like Debian install
+package file in <cite>/usr</cite> and libraries compiled locally in <cite>/usr/local</cite>.
+So both place must be looked up.</p>
+</div>
+<p>An environment variable for modifying this list at runtime, which uses
+colons (on windows, semicolon) as separators:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a final separator is just ignored</p></li>
+<li><p>a final separator indicate to append the default path</p></li>
+</ul>
+</div></blockquote>
+<p>Other choices break the simple method of appending to the variable:</p>
+<div class="line-block">
+<div class="line">FOO=new_dir:$FOO</div>
+</div>
+<p>The second choice allows the user to completely override default values for the
+lookup path.</p>
+<div class="line-block">
+<div class="line">FOO=only_dir</div>
+</div>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>Reusing the variable <cite>OCAMLPATH</cite> seems the most natural things to do, in that
+case keeping the semantic of ocamlfind is mandatory: final separator ignored,
+builtin path appended.</p>
+<p>A new variable <cite>BUILTIN_OCAMLPATH</cite> in the <cite>Makefile.config</cite> installed in
+the standard library path contains the builtin list of path</p>
+</div>
+<p>We could also add the variable to <cite>ocamlc -config</cite> but it complicates the
+modification after installation. A new file <cite>ocaml.config</cite> can be chosen instead
+of <cite>Makefile.config</cite> .</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>add updated proposition from RFC</p>
+</div>
+<p>..todo:: add updated proposition from RFC</p>
+</div>
+<div class="section" id="library-layout">
+<h2>Library layout<a class="headerlink" href="#library-layout" title="Permalink to this headline">¶</a></h2>
+<p>How a library name is resolved and what are the constraints on the libraries
+define a trade-off between the possibilities proposed to the library developers
+and the simplicity to support it for the tool developers.</p>
+<p>Examples:</p>
+<blockquote>
+<div><ul>
+<li><p>python <a class="reference internal" href="source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/main.html#python-module" id="id1"><span>[python_module]</span></a> in the lookup-path considers directories containing
+the file <cite>__init__</cite> as packages, and such sub-directories as sub-package
+accessible through <cite>package.sub_package</cite>, all the python file are directly
+in the directories</p></li>
+<li><p>pkg-config only lookup <cite>.pc</cite> files in the lookup directories which are
+configuration file for the library which contains:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>name</p></li>
+<li><p>directories</p></li>
+<li><p>version</p></li>
+<li><p>dependencies</p></li>
+<li><p>other custom variables</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>ocamlfind as a dual approach, it allows a package <cite>p</cite> to be defined by
+<cite>p/META</cite> and <cite>META.p</cite> in one of the lookup directories. The <cite>META</cite>
+configuration file is quite complexe and powerful:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>it allows to select the value of a variable according to some predicate
+(e.g is it compiling in byte or native, is the thread library used);</p></li>
+<li><p>it allows one library to be composed of more than one archive</p></li>
+<li><p>it allows to define a library only if some file is present</p></li>
+</ul>
+</div></blockquote>
+<p>However it is also restricting because one <cite>META</cite> file need to define all
+the sub-libraries of the package. So it is not possible to install a
+sub-library at a latter time (except by rewriting the file, which is usually
+not well accepted by package managers).</p>
+</li>
+</ul>
+</div></blockquote>
+<dl class="citation">
+<dt class="label" id="python-module"><span class="brackets"><a class="fn-backref" href="#id1">python_module</a></span></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3.5/tutorial/modules.html#packages">https://docs.python.org/3.5/tutorial/modules.html#packages</a></p>
+</dd>
+</dl>
+<p>There is a consensus for simplifying the layout of the library:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>one directory is a library</p></li>
+<li><p>There is only one archive for each compilation mode named <cite>lib.cma</cite>,
+<cite>lib.cmxa</cite>, <cite>lib.cmxs</cite> (it is always <cite>lib</cite> even for <cite>foo</cite> library).</p></li>
+<li><p>All the needed <cite>.cmi</cite>, <cite>.cmx</cite>, <cite>.cmt</cite>, <cite>.a</cite>, <cite>.cmo</cite> are in this directory</p></li>
+<li><p>The sub-directories are sub-libraries (<cite>foo/bar</cite> corresponds to <cite>foo.bar</cite>).</p></li>
+</ul>
+</div></blockquote>
+<p>..todo: add restrictions of names from the RFC</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>The information about library dependencies is stored in the
+archives. The information must be the same for the three
+archives. It is stored by the compiler and specified to it using
+a new option <cite>-require</cite> during archive creation.</p>
+<p>External tools would obtain this information from <cite>ocamlobjinfo</cite>.</p>
+</div>
+<p>This proposition has the advantage of not requiring new files and of putting
+together all the information that the static or dynamic linking phase needs in
+one place since the archive are already read. But it has some disadvantage:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>to duplicate the information, which can create subtitle bugs</p></li>
+<li><p>be a binary format, so <cite>rgrep</cite> can’t be used for debugging</p></li>
+<li><p>it is not extensible, in this proposition <cite>ppx</cite> support would need an
+additional file.</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>A mandatory configuration file <cite>lib.META</cite> which use the same format than
+<cite>ocamlc -config</cite> (<cite>key:value</cite>) with possibly the following
+optional keys with the values of the given type:</p>
+<ul class="simple">
+<li><p><cite>requires</cite>: string, with a space separated list of libraries
+(default empty)</p></li>
+<li><p><cite>version</cite>: string, a version with debian semantic for the
+comparison <a class="reference internal" href="source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/main.html#debian-version" id="id2"><span>[debian_version]</span></a></p></li>
+<li><p><cite>synopsis</cite>: string, a oneliner to use when listing libraries</p></li>
+<li><p><cite>private</cite> : boolean, indicates if the library should be listed</p></li>
+</ul>
+<p>As for python <cite>__init__.py</cite> a directory that doesn’t contains
+<cite>lib.META</cite> is not considered as a library or sub-library.</p>
+<p>Custom key can be used but they must use a dot inside
+<cite>qualifier.key</cite>. Other keys without dot are restricted to future
+extensions.</p>
+</div>
+<dl class="citation">
+<dt class="label" id="debian-version"><span class="brackets"><a class="fn-backref" href="#id2">debian_version</a></span></dt>
+<dd><p><a class="reference external" href="https://www.debian.org/doc/debian-policy/ch-controlfields.html#version">https://www.debian.org/doc/debian-policy/ch-controlfields.html#version</a></p>
+</dd>
+</dl>
+</div>
+<div class="section" id="library-installed-by-the-ocaml-compiler">
+<h2>Library installed by the OCaml compiler<a class="headerlink" href="#library-installed-by-the-ocaml-compiler" title="Permalink to this headline">¶</a></h2>
+<p>Currently ocamlfind (and dune) needs to create the configuration for the
+libraries installed by the compiler (<cite>unix</cite>, <cite>threads</cite>, <cite>str</cite>, …) for each of
+its version:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>for ocamlfind: <a class="reference external" href="https://github.com/ocaml/ocamlfind/blob/9e40620/configure#L505">https://github.com/ocaml/ocamlfind/blob/9e40620/configure#L505</a></p></li>
+<li><p>for dune:
+<a class="reference external" href="https://github.com/ocaml/dune/blob/58cb185/src/dune_rules/findlib/meta.ml#L144">https://github.com/ocaml/dune/blob/58cb185/src/dune_rules/findlib/meta.ml#L144</a></p></li>
+</ul>
+</div></blockquote>
+<p>This adds an additional reason for which it is not possible to test the trunk
+version of OCaml, for example when moving out a libraries (as append for <cite>num</cite>).
+And it adds possible errors and problems at unexpected time (deletion of
+graphics from 4.09, <a class="reference external" href="https://github.com/ocaml/dune/pull/3855">https://github.com/ocaml/dune/pull/3855</a> )</p>
+<p>However the installation directory has been a contentious subject in the past.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>To make the OCaml compiler libraries follow the layout for
+libraries is pushed at a later date.</p>
+</div>
+<p>However it is quite unsatisfying that the OCaml library can’t be used
+out-of-the-box so a backward compatible way can be tried.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>The installation directory is kept as it is, but a directory
+with the correct layout is added and is filled with hardlink to
+the other files. This directory is part of the built-in lookup
+path.</p>
+</div>
+</div>
+<div class="section" id="dynamic-linking">
+<h2>Dynamic Linking<a class="headerlink" href="#dynamic-linking" title="Permalink to this headline">¶</a></h2>
+<dl class="simple">
+<dt>Dynamic linking as been well supported by OCamlfind since 2015:</dt><dd><ul class="simple">
+<li><p>specify the <cite>plugin</cite> variable to specify the shared archive in <cite>META</cite> file</p></li>
+<li><p>when <cite>ocamlfind</cite> link an executable which depends on <cite>findlib.dynload</cite>, it registers the statically linked
+library by linking newly created module.</p></li>
+<li><p>The library <cite>findlib.dynload</cite> allows at runtime to load a library
+and its dependencies (hide the dynlink details)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Since 2018, Dune also does this trick at link time if <cite>findlib.dynload</cite> is a
+dependency.</p>
+<p>Currently the development of another <cite>findlib.dynload</cite> is not possible in a
+compatible way because the set of package already loaded is not shared. Moreover
+the linking trick could perhaps be simplified.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<blockquote>
+<div><p>Define a little project which would only keep the set of name of
+linked libraries. It is empty at the start, an external module
+should add the statically linked modules.</p>
+</div></blockquote>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">all_libraries</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span>
+<span class="c">(** [all_libraries ()] is the set of loaded libraries statically</span>
+<span class="c">    or dynamically. *)</span>
+
+<span class="k">val</span> <span class="n">has_library</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+<span class="c">(** [has_library l] is [List.mem l (all_libraries ())]. *)</span>
+
+<span class="k">val</span> <span class="n">add_library</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
+<span class="c">(** [add_library l] consider this library as loaded *)</span>
+</pre></div>
+</div>
+</div>
+<p>It is even possible to define this library without an implementation, the tool
+that run the ocaml linker (e.g ocamlfind, dune, ocamlbuild, brzo) could create a
+specific implementation which would directly initialize this database with the
+statically loaded library of the executable.</p>
+<p>However the <cite>dynlink</cite> module is a nice place to add that.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>Adds the function of the previous proposition to the <cite>dynlink</cite>
+module.</p>
+</div>
+<p>The linker can even simplify the initialization of the data-structure.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>ocamlc and ocamlopt gain an optional <cite>–assume-require name</cite> in
+link mode, which adds this <cite>name</cite> to the set of loaded
+libraries. It doesn’t change in any way what is linked, only
+change the database.</p>
+</div>
+<p>The name <cite>–assume-require</cite> follows the one with similar use of the RFC for
+simplicity. But another name could be more appropriate.</p>
+</div>
+<div class="section" id="ppx-specification">
+<h2>PPX specification<a class="headerlink" href="#ppx-specification" title="Permalink to this headline">¶</a></h2>
+<p>PPX are an important part of the OCaml ecosystem. At first they were only
+commands specified using the <cite>-ppx</cite> option of the compiler. However requirements
+for better error message and efficiency turned them into libraries:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>which can interact more precisely with a generic ppx framework (e.g.
+<cite>deriving</cite>)</p></li>
+<li><p>which can be linked together in order to have only one binary to run, saving
+fork time and marshalling time.</p></li>
+</ul>
+</div></blockquote>
+<p>Moreover a PPX could require a runtime library that will be called by the
+generated code. It is useful for the PPX library to points to its runtime
+library so that the dependency can be automatically added.</p>
+<p>Ocamlfind features such support and accept ppx to be specified as <cite>-package</cite>.
+The fact to use the same option for libraries and ppxs can be seen as mixing to
+different concept, or it could be seen as a simplication. Indeed for the
+developpers it is just a way to require the use of some features (an API, a deriving,
+a way to write some code) in theirs project.</p>
+<p>During the discussion about library management, we only discussed a little the
+ppx part. In all the propositions the information needed for ppx was added
+through a file. When adding the library requirements in archives an additional
+file was needed. In the case of <cite>lib.META</cite>, the informations can be specified
+there since the format is extensible.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>The information for ppx libraries will be present in a file in
+the directory. In <cite>lib.META</cite> if it is used for storing
+dependencies, a unspecified file when the dependencies are in
+the archives.</p>
+</div>
+</div>
+<div class="section" id="lookup-in-the-compiler">
+<h2>Lookup in the compiler<a class="headerlink" href="#lookup-in-the-compiler" title="Permalink to this headline">¶</a></h2>
+<p>The previous chapters discussed how the libraries are found and described.
+Although some modifications of the compiler distribution have already been
+discussed:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>the possibility to install the libraries installed by the compiler in a way
+that respect the specifications</p></li>
+<li><p>the possibility to have the set of loaded libraries stored in the dynlink module.</p></li>
+</ul>
+</div></blockquote>
+<p>The compiler in itself do not need to know yet what are libraries and how to look
+them up. This section discussed the additions, mainly options or commands, to the compiler commands <cite>ocamlc</cite>,
+<cite>ocamlopt</cite> and the toplevel.</p>
+<p>Since some of the new ecosystem part are not yet well defined, it seems natural
+to postpone this part which adds new option that will have to be</p>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../../../../../../../../../../../../../../../../../../../../../../../genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../../../../../../../../../../../../../../../../../../../../../../../py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="../../../../../../../../../../../../../../../../../../../../../../../../search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../../../../../../../../../../../../../../../../../../../../../main.html">ocaml libraries summary</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../../../../../../../../../../../../../../../../../../../../main.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../../../../../../../../../../../../../../../../../../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Bobot François.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../../../../../../../../../../../../../../../../../../../../../../../_sources/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/source/main.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
