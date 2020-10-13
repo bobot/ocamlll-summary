@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Directory location &#8212; ocaml libraries summary  documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Library layout" href="layout.html" />
+    <link rel="prev" title="OCaml libraries discussion summary" href="index.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">ocaml libraries summary  documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="index.html" title="OCaml libraries discussion summary"
+             accesskey="P">previous</a> |
+          <a href="layout.html" title="Library layout"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="directory-location">
+<h1>Directory location<a class="headerlink" href="#directory-location" title="Permalink to this headline">¶</a></h1>
+<p>Where the declarations of the libraries can be found is unavoidable for
+library management. Some examples:</p>
+<blockquote>
+<div><ul>
+<li><p><span class="target" id="index-0"></span>pkg-config:</p>
+<p>By default, pkg-config looks in the directory <code class="docutils literal notranslate"><span class="pre">prefix/lib/pkgconfig</span></code> for these
+files; it will also look in the colon-separated (on Windows,
+semicolon-separated) list of directories specified by the <code class="docutils literal notranslate"><span class="pre">PKG_CONFIG_PATH</span></code>
+environment variable.</p>
+<p>– pkg-config man page</p>
+</li>
+<li><p><span class="target" id="index-1"></span>tex:</p>
+<p>TEXINPUTS Search path for input and openin files. This should probably
+start with ‘’.’’, so that user files are found before system files. An empty
+path component will be replaced with the paths defined in the texmf.cnf
+file. For example, set TEXINPUTS to “.:/home/usr/tex:” to prepend the
+current direcory and ‘’/home/user/tex’’ to the standard search path.</p>
+<p>– tex man page</p>
+</li>
+<li><p><span class="target" id="index-2"></span>ocamlfind:</p>
+<ul class="simple">
+<li><p>The file findlib.conf contains the default <code class="docutils literal notranslate"><span class="pre">path</span></code>:</p></li>
+</ul>
+<p>The  directory  containing  findlib.conf is determined at build time (by running the configure script),
+the fallback default is /usr/local/etc. You can set a different location by  changing  the  environment
+variable OCAMLFIND_CONF which must contain the absolute path of findlib.conf.</p>
+<p><code class="docutils literal notranslate"><span class="pre">path</span></code> The  search  path for META files/package directories. The variable  enumerates directories which
+are separated by colons (Windows:  semicolons), and these directories are tried in turn to  find
+a  certain    package.</p>
+<p>– findlib.conf man page</p>
+<ul class="simple">
+<li><p><cite>OCAMLPATH</cite> allows to modifies it:</p></li>
+</ul>
+<p>OCAMLPATH This variable may contain an additional search path for package  directories. It is  treated  as
+if the directories were prepended to  the configuration variable path.</p>
+<p>– findlib.conf man page</p>
+</li>
+</ul>
+</div></blockquote>
+<p>The different tools have similarities and differences:</p>
+<p>A builtin list of paths:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>without indirection: directly in the binary</p></li>
+<li><dl class="simple">
+<dt>with an indirection: the binaries contain the path to a configuration</dt><dd><p>file which contains the list of paths to lookup.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The builtin lookup list of path must accept more than one elements because
+contrary to an <code class="docutils literal notranslate"><span class="pre">opam</span></code> installation, a distribution like Debian install
+package file in <code class="docutils literal notranslate"><span class="pre">/usr</span></code> and libraries compiled locally in <code class="docutils literal notranslate"><span class="pre">/usr/local</span></code>.
+So both place must be looked up.</p>
+</div>
+<p>An environment variable for modifying this list at runtime, which uses
+colons (on windows, semicolon) as separators:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>a final separator is just ignored</p></li>
+<li><p>a final separator indicate to append the default path</p></li>
+</ul>
+</div></blockquote>
+<p>Other choices break the simple method of appending to the variable:</p>
+<div class="line-block">
+<div class="line">FOO=new_dir:$FOO</div>
+</div>
+<p>The second choice allows the user to completely override default values for the
+lookup path.</p>
+<div class="line-block">
+<div class="line">FOO=only_dir</div>
+</div>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>Reusing the variable <code class="docutils literal notranslate"><span class="pre">OCAMLPATH</span></code> seems the most natural things to do, in that
+case keeping the semantic of ocamlfind is mandatory: final separator ignored,
+builtin path appended.</p>
+<p>A new variable <code class="docutils literal notranslate"><span class="pre">BUILTIN_OCAMLPATH</span></code> in the <code class="docutils literal notranslate"><span class="pre">Makefile.config</span></code> installed in
+the standard library path contains the builtin list of path</p>
+</div>
+<p>We could also add the variable to <code class="docutils literal notranslate"><span class="pre">ocamlc</span> <span class="pre">-config</span></code> but it complicates the
+modification after installation. A new file <code class="docutils literal notranslate"><span class="pre">ocaml.config</span></code> can be chosen instead
+of <code class="docutils literal notranslate"><span class="pre">Makefile.config</span></code> .</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>add updated proposition from RFC</p>
+</div>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>add updated proposition from RFC</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Directory location</a></li>
+<li class="toctree-l1"><a class="reference internal" href="layout.html">Library layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stdlib.html">Library installed by the OCaml compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynlink.html">Dynamic Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ppx.html">PPX specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler.html">Lookup in the compiler</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="index.html" title="OCaml libraries discussion summary"
+              >previous</a> |
+            <a href="layout.html" title="Library layout"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/location.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Bobot François.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

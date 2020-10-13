@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Library layout &#8212; ocaml libraries summary  documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Library installed by the OCaml compiler" href="stdlib.html" />
+    <link rel="prev" title="Directory location" href="location.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">ocaml libraries summary  documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="location.html" title="Directory location"
+             accesskey="P">previous</a> |
+          <a href="stdlib.html" title="Library installed by the OCaml compiler"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="library-layout">
+<h1>Library layout<a class="headerlink" href="#library-layout" title="Permalink to this headline">¶</a></h1>
+<p>How a library name is resolved and what are the constraints on the libraries
+define a trade-off between the possibilities proposed to the library developers
+and the simplicity to support it for the tool developers.</p>
+<p>Examples:</p>
+<blockquote>
+<div><ul>
+<li><p><span class="target" id="index-0"></span>python considers directories in the lookup-path containing
+the file <code class="docutils literal notranslate"><span class="pre">__init__</span></code> as packages, and such sub-directories as sub-package
+accessible through <code class="docutils literal notranslate"><span class="pre">package.sub_package</span></code>, all the python file are directly
+in the directories. <a class="reference external" href="https://docs.python.org/3.5/tutorial/modules.html#packages">https://docs.python.org/3.5/tutorial/modules.html#packages</a></p></li>
+<li><p><span class="target" id="index-1"></span>pkg-config only lookup <code class="docutils literal notranslate"><span class="pre">.pc</span></code> files in the lookup directories which are
+configuration file for the library which contains:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>name</p></li>
+<li><p>directories</p></li>
+<li><p>version</p></li>
+<li><p>dependencies</p></li>
+<li><p>other custom variables</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><span class="target" id="index-2"></span>ocamlfind as a dual approach, it allows a package <code class="docutils literal notranslate"><span class="pre">p</span></code> to be defined by
+<code class="docutils literal notranslate"><span class="pre">p/META</span></code> and <code class="docutils literal notranslate"><span class="pre">META.p</span></code> in one of the lookup directories. The <code class="docutils literal notranslate"><span class="pre">META</span></code>
+configuration file is quite complexe and powerful:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>it allows to select the value of a variable according to some predicate
+(e.g is it compiling in byte or native, is the thread library used);</p></li>
+<li><p>it allows one library to be composed of more than one <span class="target" id="index-3"></span>archive</p></li>
+<li><p>it allows to define a library only if some file is present</p></li>
+</ul>
+</div></blockquote>
+<p>However it is also restricting because one <code class="docutils literal notranslate"><span class="pre">META</span></code> file need to define all
+the sub-libraries of the package. So it is not possible to install a
+sub-library at a latter time (except by rewriting the file, which is usually
+not well accepted by package managers).</p>
+</li>
+</ul>
+</div></blockquote>
+<p>There is a consensus for simplifying the layout of the library:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>one directory is a library</p></li>
+<li><p>There is only one <span class="target" id="index-4"></span>archive for each compilation mode named <code class="docutils literal notranslate"><span class="pre">lib.cma</span></code>,
+<code class="docutils literal notranslate"><span class="pre">lib.cmxa</span></code>, <code class="docutils literal notranslate"><span class="pre">lib.cmxs</span></code> (it is always <code class="docutils literal notranslate"><span class="pre">lib</span></code> even for <code class="docutils literal notranslate"><span class="pre">foo</span></code> library).</p></li>
+<li><p>All the needed <code class="docutils literal notranslate"><span class="pre">.cmi</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmx</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmt</span></code>, <code class="docutils literal notranslate"><span class="pre">.a</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmo</span></code> are in this directory</p></li>
+<li><p>The sub-directories are sub-libraries (<code class="docutils literal notranslate"><span class="pre">foo/bar</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">foo.bar</span></code>).</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>add restrictions of names from the RFC</p>
+</div>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>The information about library dependencies is stored in the
+archives. The information must be the same for the three
+archives. It is stored by the compiler and specified to it using
+a new option <code class="docutils literal notranslate"><span class="pre">-require</span></code> during archive creation.</p>
+<p>External tools would obtain this information from <code class="docutils literal notranslate"><span class="pre">ocamlobjinfo</span></code>.</p>
+</div>
+<p>This proposition has the advantage of not requiring new files and of putting
+together all the information that the static or dynamic linking phase needs in
+one place since the archive are already read. But it has some disadvantage:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>to duplicate the information, which can create subtitle bugs</p></li>
+<li><p>be a binary format, so <code class="docutils literal notranslate"><span class="pre">rgrep</span></code> can’t be used for debugging</p></li>
+<li><p>it is not extensible, in this proposition <code class="docutils literal notranslate"><span class="pre">ppx</span></code> support would need an
+additional file.</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>A mandatory configuration file <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> which use the same format than
+<code class="docutils literal notranslate"><span class="pre">ocamlc</span> <span class="pre">-config</span></code> (<code class="docutils literal notranslate"><span class="pre">key:value</span></code>) with possibly the following
+optional keys with the values of the given type:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">requires</span></code>: string, with a space separated list of libraries
+(default empty)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">version</span></code>: string, a version with <a class="reference external" href="https://www.debian.org/doc/debian-policy/ch-controlfields.html#version">debian semantic</a> for the
+comparison</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">synopsis</span></code>: string, a oneliner to use when listing libraries</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">private</span></code> : boolean, indicates if the library should be listed</p></li>
+</ul>
+<p>As for python <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> a directory that doesn’t contains
+<code class="docutils literal notranslate"><span class="pre">lib.META</span></code> is not considered as a library or sub-library.</p>
+<p>Custom key can be used but they must use a dot inside
+<code class="docutils literal notranslate"><span class="pre">qualifier.key</span></code>. Other keys without dot are restricted to future
+extensions.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="location.html">Directory location</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Library layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stdlib.html">Library installed by the OCaml compiler</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynlink.html">Dynamic Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ppx.html">PPX specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler.html">Lookup in the compiler</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="location.html" title="Directory location"
+              >previous</a> |
+            <a href="stdlib.html" title="Library installed by the OCaml compiler"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/layout.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Bobot François.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OCaml libraries discussion summary &#8212; ocaml libraries summary  documentation</title>
+    <title>PPX specification &#8212; ocaml libraries summary  documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
@@ -16,14 +16,17 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Directory location" href="location.html" /> 
+    <link rel="next" title="Lookup in the compiler" href="compiler.html" />
+    <link rel="prev" title="Dynamic Linking" href="dynlink.html" /> 
   </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
         <div class="headertitle"><a
-          href="#">ocaml libraries summary  documentation</a></div>
+          href="index.html">ocaml libraries summary  documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="location.html" title="Directory location"
+          <a href="dynlink.html" title="Dynamic Linking"
+             accesskey="P">previous</a> |
+          <a href="compiler.html" title="Lookup in the compiler"
              accesskey="N">next</a> |
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a>
@@ -39,29 +42,39 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="ocaml-libraries-discussion-summary">
-<h1>OCaml libraries discussion summary<a class="headerlink" href="#ocaml-libraries-discussion-summary" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="location.html">Directory location</a></li>
-<li class="toctree-l1"><a class="reference internal" href="layout.html">Library layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stdlib.html">Library installed by the OCaml compiler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dynlink.html">Dynamic Linking</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ppx.html">PPX specification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="compiler.html">Lookup in the compiler</a></li>
+  <div class="section" id="ppx-specification">
+<h1>PPX specification<a class="headerlink" href="#ppx-specification" title="Permalink to this headline">¶</a></h1>
+<p>PPX are an important part of the OCaml ecosystem. At first they were only
+commands specified using the <code class="docutils literal notranslate"><span class="pre">-ppx</span></code> option of the compiler. However requirements
+for better error message and efficiency turned them into libraries:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>which can interact more precisely with a generic ppx framework (e.g.
+<code class="docutils literal notranslate"><span class="pre">deriving</span></code>)</p></li>
+<li><p>which can be linked together in order to have only one binary to run, saving
+fork time and marshalling time.</p></li>
 </ul>
+</div></blockquote>
+<p>Moreover a PPX could require a runtime library that will be called by the
+generated code. It is useful for the PPX library to points to its runtime
+library so that the dependency can be automatically added.</p>
+<p><span class="target" id="index-0"></span>Ocamlfind features such support and accept ppx to be specified as <code class="docutils literal notranslate"><span class="pre">-package</span></code>.
+The fact to use the same option for libraries and ppxs can be seen as mixing to
+different concept, or it could be seen as a simplication. Indeed for the
+developpers it is just a way to require the use of some features (an API, a deriving,
+a way to write some code) in theirs project.</p>
+<p>During the discussion about library management, we only discussed a little the
+ppx part. In all the propositions the information needed for ppx was added
+through a file. When adding the library requirements in <span class="target" id="index-1"></span>archives an additional
+file was needed. In the case of <code class="docutils literal notranslate"><span class="pre">lib.META</span></code>, the informations can be specified
+there since the format is extensible.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>The information for ppx libraries will be present in a file in
+the directory. In <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> if it is used for storing
+dependencies, a unspecified file when the dependencies are in
+the archives.</p>
 </div>
-<p>This document summaries my, François Bobot, understanding of the discussion
-around adding library management to the OCaml compiler and the simplification of
-the OCaml ecosystem on libraries. Those discussions took place during the OCaml
-Library Linking proposal project initiated by Daniel Bünzli and funded by the
-OCaml foundation which lead to this refined <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a>. The <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a> makes some
-choices that doesn’t corresponds to a consensus.</p>
-<p>Those questions have already been tackled by <span class="target" id="index-0"></span>ocamlfind developed by Gerd
-Stolpmann since before 2004. So for each point the choices made by ocamlfind
-are recalled.</p>
-<p>The propositions in each section are distinct and often incompatible. They show
-point where the consensus have not been reached or which give interesting alternative.</p>
 </div>
 
 
@@ -73,12 +86,12 @@ point where the consensus have not been reached or which give interesting altern
         <div class="sidebar">
           
           <h3>Table of Contents</h3>
-          <ul>
+          <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="location.html">Directory location</a></li>
 <li class="toctree-l1"><a class="reference internal" href="layout.html">Library layout</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stdlib.html">Library installed by the OCaml compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dynlink.html">Dynamic Linking</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ppx.html">PPX specification</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PPX specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="compiler.html">Lookup in the compiler</a></li>
 </ul>
 
@@ -99,14 +112,16 @@ point where the consensus have not been reached or which give interesting altern
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="location.html" title="Directory location"
+            <a href="dynlink.html" title="Dynamic Linking"
+              >previous</a> |
+            <a href="compiler.html" title="Lookup in the compiler"
               >next</a> |
             <a href="genindex.html" title="General Index"
               >index</a>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/index.rst.txt"
+              <a href="_sources/ppx.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

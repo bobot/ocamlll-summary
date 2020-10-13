@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OCaml libraries discussion summary &#8212; ocaml libraries summary  documentation</title>
+    <title>Library installed by the OCaml compiler &#8212; ocaml libraries summary  documentation</title>
     <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
@@ -16,14 +16,17 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Directory location" href="location.html" /> 
+    <link rel="next" title="Dynamic Linking" href="dynlink.html" />
+    <link rel="prev" title="Library layout" href="layout.html" /> 
   </head><body>
     <div class="header-wrapper" role="banner">
       <div class="header">
         <div class="headertitle"><a
-          href="#">ocaml libraries summary  documentation</a></div>
+          href="index.html">ocaml libraries summary  documentation</a></div>
         <div class="rel" role="navigation" aria-label="related navigation">
-          <a href="location.html" title="Directory location"
+          <a href="layout.html" title="Library layout"
+             accesskey="P">previous</a> |
+          <a href="dynlink.html" title="Dynamic Linking"
              accesskey="N">next</a> |
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a>
@@ -39,29 +42,37 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="ocaml-libraries-discussion-summary">
-<h1>OCaml libraries discussion summary<a class="headerlink" href="#ocaml-libraries-discussion-summary" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="location.html">Directory location</a></li>
-<li class="toctree-l1"><a class="reference internal" href="layout.html">Library layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stdlib.html">Library installed by the OCaml compiler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dynlink.html">Dynamic Linking</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ppx.html">PPX specification</a></li>
-<li class="toctree-l1"><a class="reference internal" href="compiler.html">Lookup in the compiler</a></li>
+  <div class="section" id="library-installed-by-the-ocaml-compiler">
+<h1>Library installed by the OCaml compiler<a class="headerlink" href="#library-installed-by-the-ocaml-compiler" title="Permalink to this headline">¶</a></h1>
+<p>Currently <span class="target" id="index-0"></span>ocamlfind (and <span class="target" id="index-1"></span>dune) needs to create the configuration for the
+libraries installed by the compiler (<code class="docutils literal notranslate"><span class="pre">unix</span></code>, <code class="docutils literal notranslate"><span class="pre">threads</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, …) for each of
+its version:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>for ocamlfind: <a class="reference external" href="https://github.com/ocaml/ocamlfind/blob/9e40620/configure#L505">https://github.com/ocaml/ocamlfind/blob/9e40620/configure#L505</a></p></li>
+<li><p>for dune:
+<a class="reference external" href="https://github.com/ocaml/dune/blob/58cb185/src/dune_rules/findlib/meta.ml#L144">https://github.com/ocaml/dune/blob/58cb185/src/dune_rules/findlib/meta.ml#L144</a></p></li>
 </ul>
+</div></blockquote>
+<p>This adds an additional reason for which it is not possible to test the trunk
+version of OCaml, for example when moving out a libraries (as append for <code class="docutils literal notranslate"><span class="pre">num</span></code>).
+And it adds possible errors and problems at unexpected time (deletion of
+graphics from 4.09, <a class="reference external" href="https://github.com/ocaml/dune/pull/3855">https://github.com/ocaml/dune/pull/3855</a> )</p>
+<p>However the installation directory has been a contentious subject in the past.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>To make the OCaml compiler libraries follow the layout for
+libraries is pushed at a later date.</p>
 </div>
-<p>This document summaries my, François Bobot, understanding of the discussion
-around adding library management to the OCaml compiler and the simplification of
-the OCaml ecosystem on libraries. Those discussions took place during the OCaml
-Library Linking proposal project initiated by Daniel Bünzli and funded by the
-OCaml foundation which lead to this refined <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a>. The <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a> makes some
-choices that doesn’t corresponds to a consensus.</p>
-<p>Those questions have already been tackled by <span class="target" id="index-0"></span>ocamlfind developed by Gerd
-Stolpmann since before 2004. So for each point the choices made by ocamlfind
-are recalled.</p>
-<p>The propositions in each section are distinct and often incompatible. They show
-point where the consensus have not been reached or which give interesting alternative.</p>
+<p>However it is quite unsatisfying that the OCaml library can’t be used
+out-of-the-box so a backward compatible way can be tried.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>The installation directory is kept as it is, but a directory
+with the correct layout is added and is filled with hardlink to
+the other files. This directory is part of the built-in lookup
+path.</p>
+</div>
 </div>
 
 
@@ -73,10 +84,10 @@ point where the consensus have not been reached or which give interesting altern
         <div class="sidebar">
           
           <h3>Table of Contents</h3>
-          <ul>
+          <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="location.html">Directory location</a></li>
 <li class="toctree-l1"><a class="reference internal" href="layout.html">Library layout</a></li>
-<li class="toctree-l1"><a class="reference internal" href="stdlib.html">Library installed by the OCaml compiler</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Library installed by the OCaml compiler</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dynlink.html">Dynamic Linking</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ppx.html">PPX specification</a></li>
 <li class="toctree-l1"><a class="reference internal" href="compiler.html">Lookup in the compiler</a></li>
@@ -99,14 +110,16 @@ point where the consensus have not been reached or which give interesting altern
       <div class="footer">
         <div class="left">
           <div role="navigation" aria-label="related navigaton">
-            <a href="location.html" title="Directory location"
+            <a href="layout.html" title="Library layout"
+              >previous</a> |
+            <a href="dynlink.html" title="Dynamic Linking"
               >next</a> |
             <a href="genindex.html" title="General Index"
               >index</a>
           </div>
           <div role="note" aria-label="source link">
               <br/>
-              <a href="_sources/index.rst.txt"
+              <a href="_sources/stdlib.rst.txt"
                 rel="nofollow">Show Source</a>
           </div>
         </div>

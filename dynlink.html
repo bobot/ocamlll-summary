@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Linking &#8212; ocaml libraries summary  documentation</title>
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="PPX specification" href="ppx.html" />
+    <link rel="prev" title="Library installed by the OCaml compiler" href="stdlib.html" /> 
+  </head><body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">ocaml libraries summary  documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="stdlib.html" title="Library installed by the OCaml compiler"
+             accesskey="P">previous</a> |
+          <a href="ppx.html" title="PPX specification"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dynamic-linking">
+<h1>Dynamic Linking<a class="headerlink" href="#dynamic-linking" title="Permalink to this headline">¶</a></h1>
+<dl class="simple">
+<dt>Dynamic linking as been well supported by <span class="target" id="index-0"></span>ocamlfind since 2015:</dt><dd><ul class="simple">
+<li><p>specify the <code class="docutils literal notranslate"><span class="pre">plugin</span></code> variable to specify the shared <span class="target" id="index-1"></span>archive in <code class="docutils literal notranslate"><span class="pre">META</span></code> file</p></li>
+<li><p>when <code class="docutils literal notranslate"><span class="pre">ocamlfind</span></code> link an executable which depends on <code class="docutils literal notranslate"><span class="pre">findlib.dynload</span></code>, it registers the statically linked
+library by linking newly created module.</p></li>
+<li><p>The library <code class="docutils literal notranslate"><span class="pre">findlib.dynload</span></code> allows at runtime to load a library
+and its dependencies (hide the dynlink details)</p></li>
+</ul>
+</dd>
+</dl>
+<p>Since 2018, Dune also does this trick at link time if <code class="docutils literal notranslate"><span class="pre">findlib.dynload</span></code> is a
+dependency.</p>
+<p>Currently the development of another <code class="docutils literal notranslate"><span class="pre">findlib.dynload</span></code> is not possible in a
+compatible way because the set of package already loaded is not shared. Moreover
+the linking trick could perhaps be simplified.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<blockquote>
+<div><p>Define a little project which would only keep the set of name of
+linked libraries. It is empty at the start, an external module
+should add the statically linked modules.</p>
+</div></blockquote>
+<div class="highlight-ocaml notranslate"><div class="highlight"><pre><span></span><span class="k">val</span> <span class="n">all_libraries</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span>
+<span class="c">(** [all_libraries ()] is the set of loaded libraries statically</span>
+<span class="c">    or dynamically. *)</span>
+
+<span class="k">val</span> <span class="n">has_library</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+<span class="c">(** [has_library l] is [List.mem l (all_libraries ())]. *)</span>
+
+<span class="k">val</span> <span class="n">add_library</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
+<span class="c">(** [add_library l] consider this library as loaded *)</span>
+</pre></div>
+</div>
+</div>
+<p>It is even possible to define this library without an implementation, the tool
+that run the ocaml linker (e.g <span class="target" id="index-2"></span>ocamlfind, <span class="target" id="index-3"></span>dune,
+<span class="target" id="index-4"></span>ocamlbuild, <span class="target" id="index-5"></span>brzo) could create a specific implementation which
+would directly initialize this database with the statically loaded library of
+the executable.</p>
+<p>However the <code class="docutils literal notranslate"><span class="pre">dynlink</span></code> module is a nice place to add that.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>Adds the function of the previous proposition to the <code class="docutils literal notranslate"><span class="pre">dynlink</span></code>
+module.</p>
+</div>
+<p>The linker can even simplify the initialization of the data-structure.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>ocamlc and ocamlopt gain an optional <code class="docutils literal notranslate"><span class="pre">--assume-require</span> <span class="pre">name</span></code> in
+link mode, which adds this <code class="docutils literal notranslate"><span class="pre">name</span></code> to the set of loaded
+libraries. It doesn’t change in any way what is linked, only
+change the database.</p>
+</div>
+<p>The name <code class="docutils literal notranslate"><span class="pre">--assume-require</span></code> follows the one with similar use of the RFC for
+simplicity. But another name could be more appropriate.</p>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          
+          <h3>Table of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="location.html">Directory location</a></li>
+<li class="toctree-l1"><a class="reference internal" href="layout.html">Library layout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stdlib.html">Library installed by the OCaml compiler</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dynamic Linking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ppx.html">PPX specification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compiler.html">Lookup in the compiler</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+            </form>
+          </div>
+
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="stdlib.html" title="Library installed by the OCaml compiler"
+              >previous</a> |
+            <a href="ppx.html" title="PPX specification"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/dynlink.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Bobot François.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
