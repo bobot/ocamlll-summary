@@ -125,18 +125,20 @@ lookup path.</p>
 case keeping the semantic of ocamlfind is mandatory: final separator ignored,
 builtin path appended.</p>
 <p>A new variable <code class="docutils literal notranslate"><span class="pre">BUILTIN_OCAMLPATH</span></code> in the <code class="docutils literal notranslate"><span class="pre">Makefile.config</span></code> installed in
-the standard library path contains the builtin list of path</p>
+the standard library path contains the builtin list of path, obtained from the configure.</p>
 </div>
 <p>We could also add the variable to <code class="docutils literal notranslate"><span class="pre">ocamlc</span> <span class="pre">-config</span></code> but it complicates the
 modification after installation. A new file <code class="docutils literal notranslate"><span class="pre">ocaml.config</span></code> can be chosen instead
 of <code class="docutils literal notranslate"><span class="pre">Makefile.config</span></code> .</p>
+<p>Another proposition is to be more explicit, and allows to remove the builtin path</p>
 <div class="admonition-proposition admonition">
 <p class="admonition-title">Proposition</p>
-<p>add updated proposition from RFC</p>
+<p>The value of the <code class="docutils literal notranslate"><span class="pre">OCAMLPATH</span></code> environment variable is the only path lookup
+if set. If unset a builtin path is used. So appending to the environement is
+done by:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nv">OCAMLPATH</span><span class="o">=</span>~/.local/lib/ocaml:<span class="k">$(</span>ocamlc -ocamlpath<span class="k">)</span>
+</pre></div>
 </div>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>add updated proposition from RFC</p>
 </div>
 </div>
 

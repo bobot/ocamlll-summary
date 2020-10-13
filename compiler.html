@@ -54,9 +54,67 @@ that respect the specifications</p></li>
 <p>The compiler in itself do not need to know yet what are libraries and how to look
 them up. This section discussed the additions, mainly options or commands, to the compiler commands <code class="docutils literal notranslate"><span class="pre">ocamlc</span></code>,
 <code class="docutils literal notranslate"><span class="pre">ocamlopt</span></code> and the toplevel.</p>
-<p>Since some of the new ecosystem part are not yet well defined, it seems natural
-to postpone this part which adds new option that will have to be maintained in
-the futur. In the meantime <span class="target" id="index-0"></span>ocamlfind</p>
+<p>Since some of the new ecosystem part are not yet well defined (libraries that come
+from the compiler and ppx), it seems natural to postpone this part which adds
+new option that will have to be maintained in the futur. In the meantime
+<span class="target" id="index-0"></span>ocamlfind will offer all the features during the migration to
+the new layout for the developpers.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>Don’t add yet new options for the developpers to the compiler
+commands.</p>
+</div>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>Add the options from the RFC (which choose to add the
+dependencies in the archive) :</p>
+<ul class="simple">
+<li><p>compilation phase: <code class="docutils literal notranslate"><span class="pre">-require</span></code> for using a library</p></li>
+<li><p>archive creation phase: <code class="docutils literal notranslate"><span class="pre">-require</span></code> for registrering a
+dependency</p></li>
+<li><p>linking phase: <code class="docutils literal notranslate"><span class="pre">-require</span></code> for linking and registring a static library</p></li>
+<li><p>linking phase: <code class="docutils literal notranslate"><span class="pre">-assume-require</span></code> for registring without
+linking a library</p></li>
+<li><p>Add the <code class="docutils literal notranslate"><span class="pre">-L</span></code> option in order to extend the <code class="docutils literal notranslate"><span class="pre">OCAMLPATH</span></code></p></li>
+</ul>
+<dl class="simple">
+<dt>Add the command:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">#require</span></code> in the toplevel</p></li>
+</ul>
+</dd>
+</dl>
+<p>Add the <code class="docutils literal notranslate"><span class="pre">Dynlink.require</span></code> function for loading a library</p>
+</div>
+<p>However we discussed a lot those options:</p>
+<blockquote>
+<div><ul>
+<li><p>Particularly we modified the original proposition in order to recover
+backward compatibility: archive added for linking directly on the command line
+<code class="docutils literal notranslate"><span class="pre">a.cma</span></code> or <code class="docutils literal notranslate"><span class="pre">a.cmxa</span></code> don’t anymore automatically add their dependencies.
+Before That was breaking compatibility since developpers currently list all
+the dependencies and we can’t link multiple time the same archive, so an
+option was needed for recovering the old behavior.</p></li>
+<li><p>If the information about required libraries is in the <span class="target" id="index-1"></span>archive files
+the archive creation phase need a <code class="docutils literal notranslate"><span class="pre">-require</span></code> option that it not needed when
+the information is in <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> file.</p></li>
+<li><p>The linking phase of the RFC currently accept directly archives file
+<code class="docutils literal notranslate"><span class="pre">lib.cmxa</span></code>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>It allows to directly get the requirements of a local archive</p></li>
+<li><p>But it is very hard to use if one use more than one local library, it is
+easier to use the <code class="docutils literal notranslate"><span class="pre">-L</span></code> and the name of the local libraries.</p></li>
+<li><p>But it could be simplified by accepting a directory instead of an archive,
+which has the advantage to give the name of the added library <code class="docutils literal notranslate"><span class="pre">-require</span> <span class="pre">local/foo/</span></code></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Storing the dependencies in the shared archive <code class="docutils literal notranslate"><span class="pre">.cmxs</span></code> allows to have a
+plugin system where <code class="docutils literal notranslate"><span class="pre">Dynlink.require</span></code> can be used to directly load the
+file. Otherwise a plugins need to be a directory with a <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> and
+<code class="docutils literal notranslate"><span class="pre">lib.cmxs</span></code> file, and <code class="docutils literal notranslate"><span class="pre">Dynlink.require</span></code> would load the directory.</p></li>
+</ul>
+</div></blockquote>
 </div>
 
 

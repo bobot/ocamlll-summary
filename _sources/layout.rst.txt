@@ -86,3 +86,9 @@ one place since the archive are already read. But it has some disadvantage:
 
 .. _debian semantic: https://www.debian.org/doc/debian-policy/ch-controlfields.html#version
 
+In both proposition there is no definition of what is a package. The lifting of
+the restriction to install sub-package/sub-libraries that came from the `META`
+files could allow to split opam packages more easily. Dune kept the notion of
+package because of the restriction of the META files which force to install all
+the library of the package at the same time. So the notion of package could
+loose its importance.
