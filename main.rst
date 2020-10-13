@@ -16,9 +16,10 @@ the OCaml ecosystem on libraries. Those discussions took place during the OCaml
 Library Linking proposal project initiated by Daniel Bünzli and funded by the
 OCaml foundation.
 
-The management of libraries comprise two parts:
- - How a library is defined and located on the file-system
- - How a library can be used
+..
+   The management of libraries comprise two parts:
+    - How a library is defined and located on the file-system
+    - How a library can be used
 
 Those questions have already been tackled by `ocamlfind` developed by Gerd
 Stolpmann since before 2004. So for each point the choices made by `ocamlfind`
@@ -27,8 +28,9 @@ are recalled.
 The propositions in each section are distinct and often incompatible. They show
 point where the consensus have not been reached or which give interesting alternative.
 
-Definition of a library
-***********************
+..
+   Definition of a library
+   ***********************
 
 
 Directory location
@@ -141,8 +143,6 @@ Examples:
     accessible through `package.sub_package`, all the python file are directly
     in the directories
 
-.. [python_module]  https://docs.python.org/3.5/tutorial/modules.html#packages
-
   * pkg-config only lookup `.pc` files in the lookup directories which are
     configuration file for the library which contains:
 
@@ -166,12 +166,14 @@ Examples:
     sub-library at a latter time (except by rewriting the file, which is usually
     not well accepted by package managers).
 
+.. [python_module]  https://docs.python.org/3.5/tutorial/modules.html#packages
+
 There is a consensus for simplifying the layout of the library:
 
   * one directory is a library
   * There is only one archive for each compilation mode named `lib.cma`,
     `lib.cmxa`, `lib.cmxs` (it is always `lib` even for `foo` library).
-  * All the needed `cmi`, `cmx`, `cmt`, `.a`, `cmo` are in this directory
+  * All the needed `.cmi`, `.cmx`, `.cmt`, `.a`, `.cmo` are in this directory
   * The sub-directories are sub-libraries (`foo/bar` corresponds to `foo.bar`).
 
 ..todo: add restrictions of names from the RFC
@@ -189,16 +191,17 @@ There is a consensus for simplifying the layout of the library:
 This proposition has the advantage of not requiring new files and of putting
 together all the information that the static or dynamic linking phase needs in
 one place since the archive are already read. But it has some disadvantage:
-- to duplicate the information, which can create subtitle bugs
-- be a binary format, so `rgrep` can't be used for debugging
-- it is not extensible, in this proposition `ppx` support would need an
-  additional file.
+
+ * to duplicate the information, which can create subtitle bugs
+ * be a binary format, so `rgrep` can't be used for debugging
+ * it is not extensible, in this proposition `ppx` support would need an
+   additional file.
 
 .. admonition:: Proposition
 
                 A mandatory configuration file `lib.META` which use the same format than
                 `ocamlc -config` (`key:value`) with possibly the following
-                optional keys:
+                optional keys with the values of the given type:
 
                 - `requires`: string, with a space separated list of libraries
                   (default empty)
@@ -221,13 +224,16 @@ Library installed by the OCaml compiler
 
 Currently ocamlfind (and dune) needs to create the configuration for the
 libraries installed by the compiler (`unix`, `threads`, `str`, ...) for each of
-its version.
- - for ocamlfind: https://github.com/ocaml/ocamlfind/blob/9e40620/configure#L505
- - for dune:
+its version:
+
+ * for ocamlfind: https://github.com/ocaml/ocamlfind/blob/9e40620/configure#L505
+ * for dune:
    https://github.com/ocaml/dune/blob/58cb185/src/dune_rules/findlib/meta.ml#L144
 
 This adds an additional reason for which it is not possible to test the trunk
 version of OCaml, for example when moving out a libraries (as append for `num`).
+And it adds possible errors and problems at unexpected time (deletion of
+graphics from 4.09, https://github.com/ocaml/dune/pull/3855 )
 
 However the installation directory has been a contentious subject in the past.
 
@@ -270,15 +276,17 @@ the linking trick could perhaps be simplified.
                 linked libraries. It is empty at the start, an external module
                 should add the statically linked modules.
 
-               | val all_libraries : unit -> string list
-               | (** [all_libraries ()] is the set of loaded libraries statically
-               | or dynamically. *)
-               |
-               | val has_library : string -> bool
-               | (** [has_library l] is [List.mem l (all_libraries ())]. *)
-               |
-               | val add_library: string -> unit
-               | (** [add_library l] consider this library as loaded *)
+               .. code-block:: ocaml
+
+                  val all_libraries : unit -> string list
+                  (** [all_libraries ()] is the set of loaded libraries statically
+                      or dynamically. *)
+
+                  val has_library : string -> bool
+                  (** [has_library l] is [List.mem l (all_libraries ())]. *)
+
+                  val add_library: string -> unit
+                  (** [add_library l] consider this library as loaded *)
 
 
 It is even possible to define this library without an implementation, the tool
@@ -305,9 +313,63 @@ The linker can even simplify the initialization of the data-structure.
 The name `--assume-require` follows the one with similar use of the RFC for
 simplicity. But another name could be more appropriate.
 
+PPX specification
+-----------------
+
+PPX are an important part of the OCaml ecosystem. At first they were only
+commands specified using the `-ppx` option of the compiler. However requirements
+for better error message and efficiency turned them into libraries:
+
+  * which can interact more precisely with a generic ppx framework (e.g.
+    `deriving`)
+  * which can be linked together in order to have only one binary to run, saving
+    fork time and marshalling time.
+
+Moreover a PPX could require a runtime library that will be called by the
+generated code. It is useful for the PPX library to points to its runtime
+library so that the dependency can be automatically added.
+
+Ocamlfind features such support and accept ppx to be specified as `-package`.
+The fact to use the same option for libraries and ppxs can be seen as mixing to
+different concept, or it could be seen as a simplication. Indeed for the
+developpers it is just a way to require the use of some features (an API, a deriving,
+a way to write some code) in theirs project.
+
+During the discussion about library management, we only discussed a little the
+ppx part. In all the propositions the information needed for ppx was added
+through a file. When adding the library requirements in archives an additional
+file was needed. In the case of `lib.META`, the informations can be specified
+there since the format is extensible.
+
+.. admonition:: Proposition
+
+                The information for ppx libraries will be present in a file in
+                the directory. In `lib.META` if it is used for storing
+                dependencies, a unspecified file when the dependencies are in
+                the archives.
+
+
+Lookup in the compiler
+----------------------
+
+The previous chapters discussed how the libraries are found and described.
+Although some modifications of the compiler distribution have already been
+discussed:
+
+  * the possibility to install the libraries installed by the compiler in a way
+    that respect the specifications
+  * the possibility to have the set of loaded libraries stored in the dynlink module.
+
+The compiler in itself do not need to know yet what are libraries and how to look
+them up. This section discussed the additions, mainly options or commands, to the compiler commands `ocamlc`,
+`ocamlopt` and the toplevel.
+
+Since some of the new ecosystem part are not yet well defined, it seems natural
+to postpone this part which adds new option that will have to be 
+
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
