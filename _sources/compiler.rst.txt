@@ -1,6 +1,8 @@
 Lookup in the compiler
 ----------------------
 
+.. _RFC : https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md
+
 The previous chapters discussed how the libraries are found and described.
 Although some modifications of the compiler distribution have already been
 discussed:
@@ -24,9 +26,11 @@ the new layout for the developpers.
                 Don't add yet new options for the developpers to the compiler
                 commands.
 
+.. index:: RFC
+
 .. admonition:: Proposition
 
-                Add the options from the RFC (which choose to add the
+                Add the options from the `RFC`_ (which choose to add the
                 dependencies in the archive) :
 
                 * compilation phase: ``-require`` for using a library
@@ -56,7 +60,7 @@ However we discussed a lot those options:
    the archive creation phase need a ``-require`` option that it not needed when
    the information is in ``lib.META`` file.
 
- * The linking phase of the RFC currently accept directly archives file
+ * The linking phase of the `RFC`_ currently accept directly archives file
    ``lib.cmxa``:
 
     * It allows to directly get the requirements of a local archive

@@ -90,14 +90,12 @@ not well accepted by package managers).</p>
 <li><p>one directory is a library</p></li>
 <li><p>There is only one <span class="target" id="index-4"></span>archive for each compilation mode named <code class="docutils literal notranslate"><span class="pre">lib.cma</span></code>,
 <code class="docutils literal notranslate"><span class="pre">lib.cmxa</span></code>, <code class="docutils literal notranslate"><span class="pre">lib.cmxs</span></code> (it is always <code class="docutils literal notranslate"><span class="pre">lib</span></code> even for <code class="docutils literal notranslate"><span class="pre">foo</span></code> library).</p></li>
-<li><p>All the needed <code class="docutils literal notranslate"><span class="pre">.cmi</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmx</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmt</span></code>, <code class="docutils literal notranslate"><span class="pre">.a</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmo</span></code> are in this directory</p></li>
-<li><p>The sub-directories are sub-libraries (<code class="docutils literal notranslate"><span class="pre">foo/bar</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">foo.bar</span></code>).</p></li>
+<li><p>All the needed <code class="docutils literal notranslate"><span class="pre">.cmi</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmx</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmt</span></code>, <code class="docutils literal notranslate"><span class="pre">.a</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmo</span></code> are in this directory.</p></li>
+<li><p>The sub-directories are sub-libraries (<code class="docutils literal notranslate"><span class="pre">foo/bar</span></code> corresponds to
+<code class="docutils literal notranslate"><span class="pre">foo.bar</span></code>).</p></li>
+<li><p>The RFC lists some restrictions in the naming of libraries.</p></li>
 </ul>
 </div></blockquote>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>add restrictions of names from the RFC</p>
-</div>
 <div class="admonition-proposition admonition">
 <p class="admonition-title">Proposition</p>
 <p>The information about library dependencies is stored in the

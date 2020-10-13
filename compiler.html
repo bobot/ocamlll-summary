@@ -64,9 +64,9 @@ the new layout for the developpers.</p>
 <p>Don’t add yet new options for the developpers to the compiler
 commands.</p>
 </div>
-<div class="admonition-proposition admonition">
+<div class="admonition-proposition admonition" id="index-1">
 <p class="admonition-title">Proposition</p>
-<p>Add the options from the RFC (which choose to add the
+<p>Add the options from the <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a> (which choose to add the
 dependencies in the archive) :</p>
 <ul class="simple">
 <li><p>compilation phase: <code class="docutils literal notranslate"><span class="pre">-require</span></code> for using a library</p></li>
@@ -94,10 +94,10 @@ backward compatibility: archive added for linking directly on the command line
 Before That was breaking compatibility since developpers currently list all
 the dependencies and we can’t link multiple time the same archive, so an
 option was needed for recovering the old behavior.</p></li>
-<li><p>If the information about required libraries is in the <span class="target" id="index-1"></span>archive files
+<li><p>If the information about required libraries is in the <span class="target" id="index-2"></span>archive files
 the archive creation phase need a <code class="docutils literal notranslate"><span class="pre">-require</span></code> option that it not needed when
 the information is in <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> file.</p></li>
-<li><p>The linking phase of the RFC currently accept directly archives file
+<li><p>The linking phase of the <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a> currently accept directly archives file
 <code class="docutils literal notranslate"><span class="pre">lib.cmxa</span></code>:</p>
 <blockquote>
 <div><ul class="simple">
