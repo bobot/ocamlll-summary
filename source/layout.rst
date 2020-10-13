@@ -40,10 +40,10 @@ There is a consensus for simplifying the layout of the library:
   * one directory is a library
   * There is only one :index:`archive` for each compilation mode named ``lib.cma``,
     ``lib.cmxa``, ``lib.cmxs`` (it is always ``lib`` even for ``foo`` library).
-  * All the needed ``.cmi``, ``.cmx``, ``.cmt``, ``.a``, ``.cmo`` are in this directory
-  * The sub-directories are sub-libraries (``foo/bar`` corresponds to ``foo.bar``).
-
-.. todo:: add restrictions of names from the RFC
+  * All the needed ``.cmi``, ``.cmx``, ``.cmt``, ``.a``, ``.cmo`` are in this directory.
+  * The sub-directories are sub-libraries (``foo/bar`` corresponds to
+    ``foo.bar``).
+  * The RFC lists some restrictions in the naming of libraries.
 
 .. admonition:: Proposition
 
@@ -86,3 +86,9 @@ one place since the archive are already read. But it has some disadvantage:
 
 .. _debian semantic: https://www.debian.org/doc/debian-policy/ch-controlfields.html#version
 
+In both proposition there is no definition of what is a package. The lifting of
+the restriction to install sub-package/sub-libraries that came from the `META`
+files could allow to split opam packages more easily. Dune kept the notion of
+package because of the restriction of the META files which force to install all
+the library of the package at the same time. So the notion of package could
+loose its importance.

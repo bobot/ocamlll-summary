@@ -56,5 +56,5 @@ The linker can even simplify the initialization of the data-structure.
                 libraries. It doesn't change in any way what is linked, only
                 change the database.
 
-The name ``--assume-require`` follows the one with similar use of the RFC for
+The name ``--assume-require`` follows the one with similar use of the `RFC`_ for
 simplicity. But another name could be more appropriate.

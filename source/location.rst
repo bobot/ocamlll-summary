@@ -82,14 +82,20 @@ lookup path.
   builtin path appended.
 
   A new variable ``BUILTIN_OCAMLPATH`` in the ``Makefile.config`` installed in
-  the standard library path contains the builtin list of path
+  the standard library path contains the builtin list of path, obtained from the configure.
 
 We could also add the variable to ``ocamlc -config`` but it complicates the
 modification after installation. A new file ``ocaml.config`` can be chosen instead
 of ``Makefile.config`` .
 
+Another proposition is to be more explicit, and allows to remove the builtin path
+
 .. admonition:: Proposition
 
-                add updated proposition from RFC
+   The value of the ``OCAMLPATH`` environment variable is the only path lookup
+   if set. If unset a builtin path is used. So appending to the environement is
+   done by:
 
-.. todo:: add updated proposition from RFC
+   .. code-block:: sh
+
+      OCAMLPATH=~/.local/lib/ocaml:$(ocamlc -ocamlpath)
