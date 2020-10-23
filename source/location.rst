@@ -25,7 +25,7 @@ library management. Some examples:
 
   * :index:`ocamlfind`:
 
-    * The file findlib.conf contains the default ``path``:
+    * The file findlib.conf located usually in ``etc`` contains the default ``path``:
 
     The  directory  containing  findlib.conf is determined at build time (by running the configure script),
     the fallback default is /usr/local/etc. You can set a different location by  changing  the  environment
@@ -77,25 +77,34 @@ lookup path.
 
 .. admonition:: Proposition
 
-  Reusing the variable ``OCAMLPATH`` seems the most natural things to do, in that
-  case keeping the semantic of ocamlfind is mandatory: final separator ignored,
-  builtin path appended.
+  Reusing the variable ``OCAMLPATH`` seems the most natural things to do, in
+  that case keeping the semantic of ocamlfind is mandatory for keeping the
+  backward compatibility: final separator ignored, builtin path appended.
 
   A new variable ``BUILTIN_OCAMLPATH`` in the ``Makefile.config`` installed in
-  the standard library path contains the builtin list of path, obtained from the configure.
+  the standard library path contains the builtin list of path, obtained from the
+  configure.
+
+  Appending to the environement is done by:
+
+  .. code-block:: sh
+
+     OCAMLPATH=new_dir:$OCAMLPATH
 
 We could also add the variable to ``ocamlc -config`` but it complicates the
 modification after installation. A new file ``ocaml.config`` can be chosen instead
-of ``Makefile.config`` .
+of ``Makefile.config`` that could be located in the `etc` directory, if
+keeping the ability to modify the default path is important.
 
-Another proposition is to be more explicit, and allows to remove the builtin path
+Another proposition is to be more explicit, and allows to remove the builtin
+path. However it is not backward compatible.
 
 .. admonition:: Proposition
 
    The value of the ``OCAMLPATH`` environment variable is the only path lookup
-   if set. If unset a builtin path is used. So appending to the environement is
-   done by:
+   if set. If unset a builtin path is used. So appending to the environement
+   have to be done differently by:
 
    .. code-block:: sh
 
-      OCAMLPATH=~/.local/lib/ocaml:$(ocamlc -ocamlpath)
+      OCAMLPATH=newdir:$(ocamlc -ocamlpath)
