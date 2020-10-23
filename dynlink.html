@@ -73,8 +73,8 @@ should add the statically linked modules.</p>
 <span class="k">val</span> <span class="n">has_library</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
 <span class="c">(** [has_library l] is [List.mem l (all_libraries ())]. *)</span>
 
-<span class="k">val</span> <span class="n">add_library</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
-<span class="c">(** [add_library l] consider this library as loaded *)</span>
+<span class="k">val</span> <span class="n">assume_library</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
+<span class="c">(** [assume_library l] consider this library as loaded *)</span>
 </pre></div>
 </div>
 </div>
@@ -97,8 +97,10 @@ link mode, which adds this <code class="docutils literal notranslate"><span clas
 libraries. It doesn’t change in any way what is linked, only
 change the database.</p>
 </div>
-<p>The name <code class="docutils literal notranslate"><span class="pre">--assume-require</span></code> follows the one with similar use of the <a href="#id1"><span class="problematic" id="id2">`RFC`_</span></a> for
-simplicity. But another name could be more appropriate.</p>
+<p>The name <code class="docutils literal notranslate"><span class="pre">--assume-require</span></code> follows the one with similar use of the <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a> for
+simplicity. This part is indeed not contentious, the <a class="reference external" href="https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md">RFC</a> follow the final
+proposition, the goal of this chapter is just to separate it from other more
+contentious points.</p>
 </div>
 
 

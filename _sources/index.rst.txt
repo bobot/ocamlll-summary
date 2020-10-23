@@ -18,11 +18,17 @@ OCaml libraries discussion summary
 
 This document summaries my, François Bobot, understanding of the discussion
 around adding library management to the OCaml compiler and the simplification of
-the OCaml ecosystem on libraries. Those discussions took place during the OCaml
-Library Linking proposal project initiated by Daniel Bünzli and funded by the
-OCaml foundation which led to this refined `RFC`_. The :index:`RFC` makes some
-choices that doesn't corresponds to a consensus, this document tries to present
-other possibilities discussed.
+the OCaml ecosystem on libraries. Those discussion have been initiated by
+Jéremie Dimino and Gerd Stolpman in
+https://github.com/ocaml/ocaml-library-standard and greatly advanced by an RFC document
+written by Daniel Bünzli. Then with others we refined this RFC. Finally many discussions took place
+during the OCaml Library Linking proposal project based on the RFC and
+funded by the OCaml foundation which led to this refined `RFC`_. The
+:index:`RFC` makes some choices that doesn't corresponds to a consensus, this
+document tries to present other possibilities discussed. However not all
+propositions in this document are contentious, in some cases they are just
+choices that I believe interesting to present.
+
 
 .. _RFC : https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md
 

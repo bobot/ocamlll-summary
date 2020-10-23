@@ -30,8 +30,8 @@ the linking trick could perhaps be simplified.
                   val has_library : string -> bool
                   (** [has_library l] is [List.mem l (all_libraries ())]. *)
 
-                  val add_library: string -> unit
-                  (** [add_library l] consider this library as loaded *)
+                  val assume_library: string -> unit
+                  (** [assume_library l] consider this library as loaded *)
 
 
 It is even possible to define this library without an implementation, the tool
@@ -56,5 +56,9 @@ The linker can even simplify the initialization of the data-structure.
                 libraries. It doesn't change in any way what is linked, only
                 change the database.
 
+.. _RFC : https://github.com/ocaml/RFCs/blob/e5f45ba6e9568c120c58c70de298c3a93704189a/rfcs/ocamlib.md
+
 The name ``--assume-require`` follows the one with similar use of the `RFC`_ for
-simplicity. But another name could be more appropriate.
+simplicity. This part is indeed not contentious, the `RFC`_ follow the final
+proposition, the goal of this chapter is just to separate it from other more
+contentious points.

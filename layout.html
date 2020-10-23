@@ -87,7 +87,7 @@ not well accepted by package managers).</p>
 <p>There is a consensus for simplifying the layout of the library:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>one directory is a library</p></li>
+<li><p>one directory is one library</p></li>
 <li><p>There is only one <span class="target" id="index-4"></span>archive for each compilation mode named <code class="docutils literal notranslate"><span class="pre">lib.cma</span></code>,
 <code class="docutils literal notranslate"><span class="pre">lib.cmxa</span></code>, <code class="docutils literal notranslate"><span class="pre">lib.cmxs</span></code> (it is always <code class="docutils literal notranslate"><span class="pre">lib</span></code> even for <code class="docutils literal notranslate"><span class="pre">foo</span></code> library).</p></li>
 <li><p>All the needed <code class="docutils literal notranslate"><span class="pre">.cmi</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmx</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmt</span></code>, <code class="docutils literal notranslate"><span class="pre">.a</span></code>, <code class="docutils literal notranslate"><span class="pre">.cmo</span></code> are in this directory.</p></li>
@@ -96,6 +96,13 @@ not well accepted by package managers).</p>
 <li><p>The RFC lists some restrictions in the naming of libraries.</p></li>
 </ul>
 </div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The fact that sub-directories are sub-libraries (<code class="docutils literal notranslate"><span class="pre">foo/bar</span></code> corresponds to
+<code class="docutils literal notranslate"><span class="pre">foo.bar</span></code>) is problematic for avoiding file conflict as presented at the
+end of this section. So <code class="docutils literal notranslate"><span class="pre">foo.bar/</span></code> could be considered. This choice is
+completely orthogonal to all the propositions.</p>
+</div>
 <div class="admonition-proposition admonition">
 <p class="admonition-title">Proposition</p>
 <p>The information about library dependencies is stored in the
@@ -128,18 +135,41 @@ comparison</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">synopsis</span></code>: string, a oneliner to use when listing libraries</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">private</span></code> : boolean, indicates if the library should be listed</p></li>
 </ul>
-<p>As for python <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> a directory that doesn’t contains
+<p>As for python <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>, a directory that doesn’t contains
 <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> is not considered as a library or sub-library.</p>
 <p>Custom key can be used but they must use a dot inside
 <code class="docutils literal notranslate"><span class="pre">qualifier.key</span></code>. Other keys without dot are restricted to future
 extensions.</p>
 </div>
-<p>In both proposition there is no definition of what is a package. The lifting of
-the restriction to install sub-package/sub-libraries that came from the <cite>META</cite>
-files could allow to split opam packages more easily. Dune kept the notion of
-package because of the restriction of the META files which force to install all
-the library of the package at the same time. So the notion of package could
-loose its importance.</p>
+<p>In both proposition there is no definition of what is a package. It is a
+consensus that removing this notion would be an improvement of the ecosystem.</p>
+<p>The notion of package appeared and remains for at least two reasons:</p>
+<ul class="simple">
+<li><p>the restriction of the META files which force to install all
+the libraries of a package at the same time.</p></li>
+<li><p>the fact that in Opam, the section (<code class="docutils literal notranslate"><span class="pre">libdir</span></code>, <code class="docutils literal notranslate"><span class="pre">share</span></code>) of an <cite>X.install</cite>
+file of a package <code class="docutils literal notranslate"><span class="pre">X</span></code> corresponds to <code class="docutils literal notranslate"><span class="pre">&lt;share&gt;/X</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;libdir&gt;/X</span></code>.
+<a class="reference external" href="https://opam.ocaml.org/doc/Manual.html#lt-pkgname-gt-install">https://opam.ocaml.org/doc/Manual.html#lt-pkgname-gt-install</a> . Dune used the
+notion of package for this reason.</p></li>
+</ul>
+<p>However since with these proposals the restriction in the META file is lifted and
+since in Opam 2.0.0 the section <code class="docutils literal notranslate"><span class="pre">libdir_root</span></code> and <code class="docutils literal notranslate"><span class="pre">share_root</span></code> have been
+added, it will be possible to install each library <cite>X.Y</cite> in the right directory,
+<code class="docutils literal notranslate"><span class="pre">&lt;libdir&gt;/X/Y</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;share&gt;/X/Y</span></code>. It doesn’t mean that
+the current opam packages must be splitted, just that it is a possibility let to
+the packager.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In Debian the directory for the ocaml library file and the other library
+(binary) file is separated, it is not the case in Opam. So in opam even if
+the ocaml library layout avoid collision between two library when one is the
+prefix of another, we could have collision with the other library file.
+Moreover if we choose to put the file for <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">X.Y</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;share&gt;/X</span></code>
+and <code class="docutils literal notranslate"><span class="pre">&lt;share&gt;/X/Y</span></code>, we coud have even more collisions.</p>
+<p>So putting the file of <code class="docutils literal notranslate"><span class="pre">X.Y</span></code> in <code class="docutils literal notranslate"><span class="pre">&lt;share&gt;/X.Y/</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;libdir&gt;/X.Y</span></code> would
+avoid those possible collisions. However that is not compatible with the
+namespace proposal.</p>
+</div>
 </div>
 
 

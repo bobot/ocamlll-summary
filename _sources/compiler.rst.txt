@@ -65,9 +65,12 @@ However we discussed a lot those options:
 
     * It allows to directly get the requirements of a local archive
     * But it is very hard to use if one use more than one local library, it is
-      easier to use the ``-L`` and the name of the local libraries.
+      easier to use the ``-L`` and the name of the local libraries
     * But it could be simplified by accepting a directory instead of an archive,
-      which has the advantage to give the name of the added library ``-require local/foo/``
+      which has the advantage to give the name of the added library. However it
+      doesn't work if ``foo.bar`` is  ``local/foo/bar/`` because we don't know
+      if the library is ``local.foo.bar``, ``foo.bar`` or ``bar`` but it works
+      for ``local/foo.bar/`` layout.
 
  * Storing the dependencies in the shared archive ``.cmxs`` allows to have a
    plugin system where ``Dynlink.require`` can be used to directly load the

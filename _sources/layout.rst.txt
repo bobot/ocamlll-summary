@@ -37,13 +37,21 @@ Examples:
 
 There is a consensus for simplifying the layout of the library:
 
-  * one directory is a library
+  * one directory is one library
   * There is only one :index:`archive` for each compilation mode named ``lib.cma``,
     ``lib.cmxa``, ``lib.cmxs`` (it is always ``lib`` even for ``foo`` library).
   * All the needed ``.cmi``, ``.cmx``, ``.cmt``, ``.a``, ``.cmo`` are in this directory.
   * The sub-directories are sub-libraries (``foo/bar`` corresponds to
     ``foo.bar``).
   * The RFC lists some restrictions in the naming of libraries.
+
+.. note::
+
+   The fact that sub-directories are sub-libraries (``foo/bar`` corresponds to
+   ``foo.bar``) is problematic for avoiding file conflict as presented at the
+   end of this section. So ``foo.bar/`` could be considered. This choice is
+   completely orthogonal to all the propositions.
+
 
 .. admonition:: Proposition
 
@@ -77,7 +85,7 @@ one place since the archive are already read. But it has some disadvantage:
                 - ``synopsis``: string, a oneliner to use when listing libraries
                 - ``private`` : boolean, indicates if the library should be listed
 
-                As for python ``__init__.py`` a directory that doesn't contains
+                As for python ``__init__.py``, a directory that doesn't contains
                 ``lib.META`` is not considered as a library or sub-library.
 
                 Custom key can be used but they must use a dot inside
@@ -86,9 +94,34 @@ one place since the archive are already read. But it has some disadvantage:
 
 .. _debian semantic: https://www.debian.org/doc/debian-policy/ch-controlfields.html#version
 
-In both proposition there is no definition of what is a package. The lifting of
-the restriction to install sub-package/sub-libraries that came from the `META`
-files could allow to split opam packages more easily. Dune kept the notion of
-package because of the restriction of the META files which force to install all
-the library of the package at the same time. So the notion of package could
-loose its importance.
+In both proposition there is no definition of what is a package. It is a
+consensus that removing this notion would be an improvement of the ecosystem.
+
+The notion of package appeared and remains for at least two reasons:
+
+- the restriction of the META files which force to install all
+  the libraries of a package at the same time.
+- the fact that in Opam, the section (``libdir``, ``share``) of an `X.install`
+  file of a package ``X`` corresponds to ``<share>/X``, ``<libdir>/X``.
+  https://opam.ocaml.org/doc/Manual.html#lt-pkgname-gt-install . Dune used the
+  notion of package for this reason.
+
+However since with these proposals the restriction in the META file is lifted and
+since in Opam 2.0.0 the section ``libdir_root`` and ``share_root`` have been
+added, it will be possible to install each library `X.Y` in the right directory,
+``<libdir>/X/Y`` and ``<share>/X/Y``. It doesn't mean that
+the current opam packages must be splitted, just that it is a possibility let to
+the packager.
+
+.. note::
+
+   In Debian the directory for the ocaml library file and the other library
+   (binary) file is separated, it is not the case in Opam. So in opam even if
+   the ocaml library layout avoid collision between two library when one is the
+   prefix of another, we could have collision with the other library file.
+   Moreover if we choose to put the file for ``X`` and ``X.Y`` in ``<share>/X``
+   and ``<share>/X/Y``, we coud have even more collisions.
+
+   So putting the file of ``X.Y`` in ``<share>/X.Y/`` and ``<libdir>/X.Y`` would
+   avoid those possible collisions. However that is not compatible with the
+   namespace proposal.

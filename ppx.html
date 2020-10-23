@@ -45,8 +45,10 @@
   <div class="section" id="ppx-specification">
 <h1>PPX specification<a class="headerlink" href="#ppx-specification" title="Permalink to this headline">¶</a></h1>
 <p>PPX are an important part of the OCaml ecosystem. At first they were only
-commands specified using the <code class="docutils literal notranslate"><span class="pre">-ppx</span></code> option of the compiler. However requirements
-for better error message and efficiency turned them into libraries:</p>
+commands specified using the <code class="docutils literal notranslate"><span class="pre">-ppx</span></code> option of the compiler. However
+requirements for better error message, efficiency and a composition semantic
+that allows developer to understand and reason about how their ppx rewriter will
+interact with other arbitrary ppx rewriter, turned them into libraries:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>which can interact more precisely with a generic ppx framework (e.g.
@@ -64,16 +66,22 @@ different concept, or it could be seen as a simplication. Indeed for the
 developpers it is just a way to require the use of some features (an API, a deriving,
 a way to write some code) in theirs project.</p>
 <p>During the discussion about library management, we only discussed a little the
-ppx part. In all the propositions the information needed for ppx was added
-through a file. When adding the library requirements in <span class="target" id="index-1"></span>archives an additional
-file was needed. In the case of <code class="docutils literal notranslate"><span class="pre">lib.META</span></code>, the informations can be specified
+ppx part. In the case of <code class="docutils literal notranslate"><span class="pre">lib.META</span></code>, the informations can be specified
 there since the format is extensible.</p>
 <div class="admonition-proposition admonition">
 <p class="admonition-title">Proposition</p>
-<p>The information for ppx libraries will be present in a file in
-the directory. In <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> if it is used for storing
-dependencies, a unspecified file when the dependencies are in
-the archives.</p>
+<p>The information for ppx libraries will be present in
+<code class="docutils literal notranslate"><span class="pre">lib.META</span></code>.</p>
+</div>
+<p>When adding the library requirements in <span class="target" id="index-1"></span>archives an additional
+file was needed. But if the only needed information for a ppx is the runtime
+dependency, only the presence of the file is needed.</p>
+<div class="admonition-proposition admonition">
+<p class="admonition-title">Proposition</p>
+<p>A ppx library is detected by the presence of a <cite>ppx.exe</cite> file,
+which could be executable and apply the ppx, or just be an empty
+non executable file (e.g plugin for deriving). The runtime
+dependency will be found using a convention, e.g <cite>PPX.runtime</cite>.</p>
 </div>
 </div>
 

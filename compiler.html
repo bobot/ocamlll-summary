@@ -103,9 +103,12 @@ the information is in <code class="docutils literal notranslate"><span class="pr
 <div><ul class="simple">
 <li><p>It allows to directly get the requirements of a local archive</p></li>
 <li><p>But it is very hard to use if one use more than one local library, it is
-easier to use the <code class="docutils literal notranslate"><span class="pre">-L</span></code> and the name of the local libraries.</p></li>
+easier to use the <code class="docutils literal notranslate"><span class="pre">-L</span></code> and the name of the local libraries</p></li>
 <li><p>But it could be simplified by accepting a directory instead of an archive,
-which has the advantage to give the name of the added library <code class="docutils literal notranslate"><span class="pre">-require</span> <span class="pre">local/foo/</span></code></p></li>
+which has the advantage to give the name of the added library. However it
+doesn’t work if <code class="docutils literal notranslate"><span class="pre">foo.bar</span></code> is  <code class="docutils literal notranslate"><span class="pre">local/foo/bar/</span></code> because we don’t know
+if the library is <code class="docutils literal notranslate"><span class="pre">local.foo.bar</span></code>, <code class="docutils literal notranslate"><span class="pre">foo.bar</span></code> or <code class="docutils literal notranslate"><span class="pre">bar</span></code> but it works
+for <code class="docutils literal notranslate"><span class="pre">local/foo.bar/</span></code> layout.</p></li>
 </ul>
 </div></blockquote>
 </li>
