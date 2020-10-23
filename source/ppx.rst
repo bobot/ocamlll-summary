@@ -31,7 +31,7 @@ there since the format is extensible.
                 The information for ppx libraries will be present in
                 ``lib.META``.
 
- When adding the library requirements in :index:`archives<single:archive>` an additional
+When adding the library requirements in :index:`archives<single:archive>` an additional
 file was needed. But if the only needed information for a ppx is the runtime
 dependency, only the presence of the file is needed.
 

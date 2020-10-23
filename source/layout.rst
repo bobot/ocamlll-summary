@@ -98,8 +98,9 @@ In both proposition there is no definition of what is a package. It is a
 consensus that removing this notion would be an improvement of the ecosystem.
 
 The notion of package appeared and remains for at least two reasons:
+
 - the restriction of the META files which force to install all
-the libraries of a package at the same time.
+  the libraries of a package at the same time.
 - the fact that in Opam, the section (``libdir``, ``share``) of an `X.install`
   file of a package ``X`` corresponds to ``<share>/X``, ``<libdir>/X``.
   https://opam.ocaml.org/doc/Manual.html#lt-pkgname-gt-install . Dune used the
