@@ -45,6 +45,14 @@ There is a consensus for simplifying the layout of the library:
     ``foo.bar``).
   * The RFC lists some restrictions in the naming of libraries.
 
+.. note::
+
+   The fact that sub-directories are sub-libraries (``foo/bar`` corresponds to
+   ``foo.bar``) is problematic for avoiding file conflict as presented at the
+   end of this section. So ``foo.bar/`` could be considered. This choice is
+   completely orthogonal to all the propositions.
+
+
 .. admonition:: Proposition
 
                 The information about library dependencies is stored in the
