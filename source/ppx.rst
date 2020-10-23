@@ -2,8 +2,10 @@ PPX specification
 -----------------
 
 PPX are an important part of the OCaml ecosystem. At first they were only
-commands specified using the ``-ppx`` option of the compiler. However requirements
-for better error message and efficiency turned them into libraries:
+commands specified using the ``-ppx`` option of the compiler. However
+requirements for better error message, efficiency and a composition semantic
+that allows developer to understand and reason about how their ppx rewriter will
+interact with other arbitrary ppx rewriter, turned them into libraries:
 
   * which can interact more precisely with a generic ppx framework (e.g.
     ``deriving``)
@@ -21,14 +23,21 @@ developpers it is just a way to require the use of some features (an API, a deri
 a way to write some code) in theirs project.
 
 During the discussion about library management, we only discussed a little the
-ppx part. In all the propositions the information needed for ppx was added
-through a file. When adding the library requirements in :index:`archives<single:archive>` an additional
-file was needed. In the case of ``lib.META``, the informations can be specified
+ppx part. In the case of ``lib.META``, the informations can be specified
 there since the format is extensible.
 
 .. admonition:: Proposition
 
-                The information for ppx libraries will be present in a file in
-                the directory. In ``lib.META`` if it is used for storing
-                dependencies, a unspecified file when the dependencies are in
-                the archives.
+                The information for ppx libraries will be present in
+                ``lib.META``.
+
+ When adding the library requirements in :index:`archives<single:archive>` an additional
+file was needed. But if the only needed information for a ppx is the runtime
+dependency, only the presence of the file is needed.
+
+.. admonition:: Proposition
+
+                A ppx library is detected by the presence of a `ppx.exe` file,
+                which could be executable and apply the ppx, or just be an empty
+                non executable file (e.g plugin for deriving). The runtime
+                dependency will be found using a convention, e.g `PPX.runtime`.
