@@ -1,8 +1,8 @@
 Directory location
 ------------------
 
-Where the declarations of the libraries can be found is unavoidable for
-library management. Some examples:
+All library manager have a system to locate the declaration of libraries. Some
+examples:
 
   * :index:`pkg-config`:
 
@@ -54,7 +54,7 @@ A builtin list of paths:
         file which contains the list of paths to lookup.
 
 .. note::
-   The builtin lookup list of path must accept more than one elements because
+   The builtin lookup list of path must accept more than one element because
    contrary to an ``opam`` installation, a distribution like Debian install
    package file in ``/usr`` and libraries compiled locally in ``/usr/local``.
    So both place must be looked up.
