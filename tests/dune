@@ -1,0 +1,8 @@
+(executable
+ (name bench_read)
+ (libraries core_bench core))
+
+(rule
+ (action (with-stdout-to bench_read.result (run ./bench_read.exe)))
+ (mode promote)
+)
