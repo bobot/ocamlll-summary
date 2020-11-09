@@ -71,6 +71,17 @@ one place since the archive are already read. But it has some disadvantage:
  * be a binary format, so ``rgrep`` can't be used for debugging
  * it is not extensible, in this proposition ``ppx`` support would need an
    additional file.
+ * makes getting the information a lot slower for ocamlfind or other tools that
+   doesn't cache this information.
+
+.. note::
+
+   Micro-bench which compare reading directly a file or through `cat`:
+   https://github.com/bobot/ocamlll-summary/tree/main/tests/bench_read.ml
+
+   .. literalinclude:: ../tests/bench_read.result
+      :language: text
+
 
 .. admonition:: Proposition
 

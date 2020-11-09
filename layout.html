@@ -6,8 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Library layout &#8212; ocaml libraries summary  documentation</title>
-    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
@@ -120,8 +120,24 @@ one place since the archive are already read. But it has some disadvantage:</p>
 <li><p>be a binary format, so <code class="docutils literal notranslate"><span class="pre">rgrep</span></code> can’t be used for debugging</p></li>
 <li><p>it is not extensible, in this proposition <code class="docutils literal notranslate"><span class="pre">ppx</span></code> support would need an
 additional file.</p></li>
+<li><p>makes getting the information a lot slower for ocamlfind or other tools that
+doesn’t cache this information.</p></li>
 </ul>
 </div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Micro-bench which compare reading directly a file or through <cite>cat</cite>:
+<a class="reference external" href="https://github.com/bobot/ocamlll-summary/tree/main/tests/bench_read.ml">https://github.com/bobot/ocamlll-summary/tree/main/tests/bench_read.ml</a></p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Estimated testing time 20s (2 benchmarks x 10s). Change using &#39;-quota&#39;.
+┌─────────────┬────────────┬───────────┬──────────┬──────────┬────────────┐
+│ Name        │   Time/Run │   mWd/Run │ mjWd/Run │ Prom/Run │ Percentage │
+├─────────────┼────────────┼───────────┼──────────┼──────────┼────────────┤
+│ read_direct │    18.79us │   109.03w │   8.19kw │          │      1.84% │
+│ read_cat    │ 1_023.26us │ 7_562.13w │   8.20kw │    8.58w │    100.00% │
+└─────────────┴────────────┴───────────┴──────────┴──────────┴────────────┘
+</pre></div>
+</div>
+</div>
 <div class="admonition-proposition admonition">
 <p class="admonition-title">Proposition</p>
 <p>A mandatory configuration file <code class="docutils literal notranslate"><span class="pre">lib.META</span></code> which use the same format than
@@ -225,7 +241,7 @@ namespace proposal.</p>
           
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020, Bobot François.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.3.0.
     </div>
         </div>
         <div class="clearer"></div>
